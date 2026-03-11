@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Llamador Bingo 75 (filas horizontales + muchas voces)</title>
+  <style>
+    :root{
+      --B:#3b82f6; --I:#ef4444; --N:#9ca3af; --G:#22c55e; --O:#eab308;
+      --bg:#f6f7fb; --panel:#ffffff; --muted:#6b7280; --border:#e5e7eb;
+      --cell-bg:#4b5563; --cell-text:#e5e7eb; --row-bg:#3f3f46;
+      --on:#38bdf8; --on-text:#06253a; --shadow:#00000018;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:linear-gradient(#f9fafb,#eef2f7);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial; color:#0f172a;}
+    header{padding:12px 16px; background:#fff; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:5;}
+    h1{margin:0; font-size:18px}
+    .controls{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+    .btn{padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer;
+      font-weight:700; color:#111827; box-shadow:0 2px 6px #00000015; transition:.15s;}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:#0ea5e9; color:#f0f9ff; border-color:#0ea5e9}
+    .btn-danger{background:#ef4444; color:#fff; border-color:#ef4444}
+    .btn-ghost{background:#fff}
+    input[type="range"]{accent-color:#0ea5e9}
+    select{padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:#fff}
+    .pill{padding:6px 10px; border-radius:999px; background:#fff; border:1px solid var(--border); font-weight:700; color:#374151}
+    main{max-width:1150px; margin:0 auto; padding:16px}
+
+    .top{display:grid; grid-template-columns:1fr 320px; gap:16px; margin-bottom:14px}
+    .last{background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px; display:grid; gap:8px;}
+    .last .label{color:#6b7280; font-size:13px}
+    .last .ball{width:140px; height:140px; border-radius:999px; border:8px solid #e2e8f0; margin:auto; display:grid; place-items:center;
+      font-size:48px; font-weight:900; background:#fff; color:#0f172a; box-shadow:inset 0 -10px 18px #0000000e, 0 12px 30px #00000008;}
+    .last .ball small{display:block; font-size:.42em; color:#475569; margin-top:-6px}
+    .status{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+
+    .board{background:#fff; border:1px solid var(--border); border-radius:12px; overflow:hidden;
+      box-shadow:0 12px 24px #00000010; padding:12px; display:grid; gap:10px;}
+    .row{display:grid; grid-template-columns: 78px repeat(15, 1fr); gap:6px; background:var(--row-bg);
+      padding:8px; border-radius:12px; border:1px solid #2a2a2f;}
+    .head{display:grid; place-items:center}
+    .bball{width:62px; height:62px; border-radius:999px; color:#fff; font-weight:900; display:grid; place-items:center;
+      box-shadow:inset 0 -8px 16px #00000033, 0 6px 16px #00000022; text-shadow:0 1px 1px #0007;
+      border:4px solid #ffffffaa; user-select:none;}
+    .B{background:var(--B)} .I{background:var(--I)} .N{background:var(--N)} .G{background:var(--G)} .O{background:var(--O)}
+    .cell{display:grid; place-items:center; padding:10px; border-radius:10px; background:var(--cell-bg); color:var(--cell-text);
+      font-weight:800; font-variant-numeric:tabular-nums; border:1px solid #2f2f35; user-select:none;}
+    .cell.on{background:var(--on); color:var(--on-text); box-shadow:inset 0 0 0 2px #91defc}
+
+    .history{display:flex; flex-wrap:wrap; gap:6px; max-height:130px; overflow:auto; margin-top:12px}
+    .tag{font-size:13px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:#fafafa}
+
+    .audio-controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .muted{opacity:.6}
+    .sl{display:flex; gap:6px; align-items:center}
+
+    /* Toast minimalista */
+    .toast{
+      position: fixed; left:50%; bottom: 24px; transform: translateX(-50%);
+      background:#111827; color:#f9fafb; padding:10px 14px; border-radius:10px;
+      box-shadow:0 6px 20px #00000030; opacity:0; pointer-events:none; transition:.2s;
+      font-weight:700; font-size:14px; z-index: 9999;
+    }
+    .toast.show{ opacity:1; pointer-events:auto }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Llamador Bingo 75</h1>
+    <div class="controls">
+      <button id="draw" class="btn btn-primary">Sacar bola</button>
+      <button id="toggleAuto" class="btn">Automático: OFF</button>
+      <span class="pill">Velocidad: <span id="speedVal">900</span> ms</span>
+      <input id="speed" type="range" min="300" max="10000" step="100" value="900" />
+      <button id="reset" class="btn btn-danger">Reiniciar</button>
+
+      <!-- Controles de audio y voces graciosas -->
+      <div class="audio-controls">
+        <button id="mute" class="btn btn-ghost">🔈 Sonido: ON</button>
+        <label class="pill sl">Voz:
+          <select id="voiceSelect"></select>
+       
+
+        <label class="pill sl">Pitch <input id="pitch" type="range" min="0.5" max="2" step="0.05" value="1"/></label>
+        <label class="pill sl">Rate <input id="rate" type="range" min="0.5" max="1.6" step="0.05" value="0.95"/></label>
+        <label class="pill sl">Ding <input id="dingToggle" type="checkbox" checked /></label>
+        <button id="testVoice" class="btn btn-ghost">🔊 Probar voz</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="top">
+      <div></div>
+      <div class="last">
+        <div class="label">Última bola</div>
+        <div class="ball" id="lastBall">—<small></small></div>
+
+        <button id="repeatLast" class="btn btn-ghost" style="margin-top:8px; width:100%;">
+          🔊 Repetir última bola
+        </button>
+
+        <div class="status">
+          <span class="pill">Sacadas: <strong id="count">0</strong></span>
+          <span class="pill">Restantes: <strong id="remaining">75</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <section class="board">
+      <div id="rowB" class="row"></div>
+      <div id="rowI" class="row"></div>
+      <div id="rowN" class="row"></div>
+      <div id="rowG" class="row"></div>
+      <div id="rowO" class="row"></div>
+    </section>
+  </main>
+
+  <script>
+  const $ =(s)=>document.querySelector(s);
+  let auto=false, timer=null, interval=900;
+
+  // ====== Cooldown (5s) ======
+  const COOLDOWN_MS = 5000; // ⏱️ 5 segundos
+  let lastDrawAt = 0;       // timestamp de la última extracción
+
+  function canDrawNow(){
+    const now = Date.now();
+    return (now - lastDrawAt) >= COOLDOWN_MS;
+  }
+  function markDraw(){ lastDrawAt = Date.now(); }
+
+  // Toast simple
+  function showToast(msg, ms=1800){
+    let t = $("#toast");
+    if (!t){
+      t = document.createElement("div");
+      t.id = "toast";
+      t.className = "toast";
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(()=> t.classList.remove("show"), ms);
+  }
+
+  // Feedback rápido en el botón
+  function pulseDrawButton(msg=null){
+    const btn = $("#draw");
+    if (!btn) return;
+    const old = btn.textContent;
+    if (msg){
+      btn.textContent = msg;
+      btn.disabled = true;
+      btn.style.opacity = 0.75;
+      setTimeout(()=>{ btn.textContent = old; btn.disabled = false; btn.style.opacity = 1; }, 1200);
+    } else {
+      btn.style.transform = 'scale(0.97)';
+      setTimeout(()=> btn.style.transform = '', 120);
+    }
+  }
+
+  // --- Voz del sistema (mensajes no de bola) ---
+  function speakSystem(text){
+    if (IS_MUTED || !("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = SELECTED_VOICE || null;
+    u.lang = (SELECTED_VOICE && SELECTED_VOICE.lang) || "es-ES";
+    u.pitch = 1;
+    u.rate = 0.95;
+    u.volume = 1.0;
+    try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch {}
+  }
+
+  // ====== Audio & Voces ======
+  let IS_MUTED = false;
+  let VOICES = [];
+  let SELECTED_VOICE = null;
+  let useDing = true;
+
+  // 👉 Guarda la última etiqueta (B-12, N-42, etc.)
+  let LAST_LABEL = null;
+
+  function populateVoices(){
+    if (!("speechSynthesis" in window)) return;
+    VOICES = speechSynthesis.getVoices();
+    const sel = $("#voiceSelect"); if (!sel) return;
+    sel.innerHTML = "";
+    const prefer = v => /(es-|es_)/i.test(v.lang) ? 0 : 1;
+    VOICES.sort((a,b)=> prefer(a)-prefer(b) || a.name.localeCompare(b.name));
+    VOICES.forEach((v, idx)=>{
+      const opt = document.createElement("option");
+      opt.value = String(idx);
+      opt.textContent = `${v.name} (${v.lang})`;
+      sel.appendChild(opt);
+    });
+    if (VOICES.length){
+      const idxES = VOICES.findIndex(v=>/(es-|es_)/i.test(v.lang));
+      sel.value = idxES >= 0 ? String(idxES) : "0";
+      SELECTED_VOICE = VOICES[parseInt(sel.value,10)];
+    }
+  }
+  if ("speechSynthesis" in window){
+    populateVoices();
+    window.speechSynthesis.onvoiceschanged = populateVoices;
+  }
+
+  function playDingPattern(pattern=[880,1100]){
+    if (IS_MUTED || !useDing) return;
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      let t = ctx.currentTime;
+      pattern.forEach((freq)=>{
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine"; o.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.25, t+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t+0.18);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t+0.2);
+        t += 0.15;
+      });
+    }catch{}
+  }
+  function playDing(){ playDingPattern([880]); }
+
+  function numberToSpanish(n){ return String(parseInt(n,10)); }
+  function stutter(word){ if (!word) return word; if (word.length<=2) return word; return `${word[0]}-${word[0]}-${word}`; }
+  function chooseRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function funnyTransform(label, preset){
+    const [letter, raw] = label.split("-");
+    const num = numberToSpanish(raw);
+    if (preset === "random"){
+      preset = chooseRandom(["helium","robot","grave","payaso","darth","eco","monster","sing","whisper","campanero"]);
+    }
+    switch (preset){
+      case "helium":   return `${letter} ${num}! jijiji`;
+      case "robot":    return `${letter}. ${stutter(num)}.`;
+      case "grave":    return `${letter} ${num}`;
+      case "payaso":   return `${letter} ${num} ¡toma chango tu banana!`;
+      case "darth":    return `${letter} ${num}...`;
+      case "eco":      return `${letter} ${num}... ${num}... ${num}...`;
+      case "monster":  return `${letter} ${num} en la caverna...`;
+      case "sing":     return `${letter} ${num} ♫`;
+      case "whisper":  return `shhh... ${letter} ${num}`;
+      case "campanero":return `${letter} ${num}`;
+      default:         return `${letter} ${num}`;
+    }
+  }
+
+  function speakOnce(text, opts={}){
+    if (IS_MUTED || !("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = SELECTED_VOICE || null;
+    u.lang  = (SELECTED_VOICE && SELECTED_VOICE.lang) || "es-ES";
+    u.pitch = opts.pitch ?? parseFloat($("#pitch")?.value ?? 1);
+    u.rate  = opts.rate  ?? parseFloat($("#rate")?.value ?? 0.95);
+    u.volume= opts.volume?? 1.0;
+    try{ speechSynthesis.speak(u); }catch{}
+    return u;
+  }
+
+  function speakBall(label){
+    if (IS_MUTED || !("speechSynthesis" in window) || !label) return;
+    const basePitch = parseFloat($("#pitch")?.value ?? 1);
+    const baseRate  = parseFloat($("#rate")?.value ?? 0.95);
+    const presetSel = $("#preset")?.value ?? "normal";
+    const preset = presetSel === "random"
+      ? chooseRandom(["helium","robot","grave","payaso","darth","eco","monster","sing","whisper","campanero","normal"])
+      : presetSel;
+
+    if (preset === "campanero") playDingPattern([784,988]); // campanazo
+
+    const text = funnyTransform(label, preset);
+    let p = basePitch, r = baseRate, v = 1.0;
+
+    switch (preset){
+      case "helium":   p = Math.min(2, p+0.7); r = Math.min(1.6, r+0.15); break;
+      case "robot":    p = Math.max(0.6, p-0.25); r = Math.max(0.6, r-0.05); break;
+      case "grave":    p = Math.max(0.5, p-0.4); r = Math.max(0.7, r-0.05); break;
+      case "payaso":   p = Math.min(2, p+0.3); r = Math.min(1.6, r+0.05); break;
+      case "darth":    p = Math.max(0.5, p-0.45); r = Math.max(0.75, r-0.05); break;
+      case "whisper":  r = Math.max(0.8, r-0.05); v = 0.4; break;
+      case "monster":  p = Math.max(0.5, p-0.5); r = Math.max(0.7, r-0.1); break;
+    }
+
+    if (preset === "eco"){
+      speakOnce(text, {pitch:p, rate:r, volume:1});
+      setTimeout(()=>speakOnce(text, {pitch:p+0.05, rate:r+0.05, volume:0.7}), 240);
+      setTimeout(()=>speakOnce(text, {pitch:p+0.08, rate:r+0.08, volume:0.5}), 480);
+    } else if (preset === "sing"){
+      speakOnce(text.replace("♫",""), {pitch:p+0.35, rate:r, volume:v});
+      setTimeout(()=>speakOnce(text.replace("♫",""), {pitch:Math.max(0.6,p-0.2), rate:r-0.02, volume:v}), 300);
+    } else if (preset === "monster"){
+      speakOnce(text, {pitch:p, rate:r, volume:v});
+      setTimeout(()=>speakOnce(text, {pitch:Math.max(0.5,p-0.1), rate:r+0.02, volume:0.6}), 220);
+    } else {
+      speakOnce(text, {pitch:p, rate:r, volume:v});
+    }
+  }
+
+  // ====== Backend API & Render ======
+  function setAuto(on){
+    auto = on;
+    $("#toggleAuto").textContent = `Automático: ${auto ? "ON" : "OFF"}`;
+    const effective = Math.max(interval, COOLDOWN_MS); // mínimo 5s en auto
+    if (auto){
+      if (timer) clearInterval(timer);
+      timer = setInterval(draw, effective);
+      $("#speedVal").textContent = effective; // muestra intervalo efectivo
+    } else {
+      if (timer) clearInterval(timer);
+      timer = null;
+      $("#speedVal").textContent = interval;
+    }
+  }
+
+  async function api(path, opts={}){
+    const res = await fetch(path, {
+      method: opts.method || "GET",
+      headers: {"Content-Type":"application/json"},
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    });
+    if (!res.ok){
+      let msg = "Error";
+      try { const j = await res.json(); msg = j.error || msg; } catch {}
+      throw new Error(msg);
+    }
+    return res.json();
+  }
+
+  function buildRow(containerId, letter, start){
+    const row = $(containerId); row.innerHTML = "";
+    const head = document.createElement("div");
+    head.className = "head";
+    head.innerHTML = `<div class="bball ${letter}">${letter}</div>`;
+    row.appendChild(head);
+    for (let k=0; k<15; k++){
+      const n = start + k;
+      const c = document.createElement("div");
+      c.className = "cell";
+      c.id = `n-${n}`;
+      c.textContent = n;
+      row.appendChild(c);
+    }
+  }
+  function buildBoard(){
+    buildRow("#rowB","B",1);
+    buildRow("#rowI","I",16);
+    buildRow("#rowN","N",31);
+    buildRow("#rowG","G",46);
+    buildRow("#rowO","O",61);
+  }
+  function letterByNum(n){
+    if (1 <= n && n <= 15) return "B";
+    if (16 <= n && n <= 30) return "I";
+    if (31 <= n && n <= 45) return "N";
+    if (46 <= n && n <= 60) return "G";
+    return "O";
+  }
+  function renderState(st){
+    const lb = $("#lastBall");
+    if (st.last_label){
+      const [L, num] = st.last_label.split("-");
+      lb.innerHTML = `${num}<small>${L}</small>`;
+      LAST_LABEL = st.last_label; // guarda para repetir
+    } else if (st.last){
+      lb.textContent = String(st.last);
+      LAST_LABEL = st.last ? `${letterByNum(st.last)}-${st.last}` : null;
+    } else {
+      lb.innerHTML = "—<small></small>";
+      LAST_LABEL = null;
+    }
+
+    $("#count").textContent = st.history.length;
+    $("#remaining").textContent = st.remaining_count;
+
+    const set = new Set(st.history);
+    for (let n=1; n<=75; n++){
+      const el = document.getElementById(`n-${n}`);
+      if (!el) continue;
+      if (set.has(n)) el.classList.add("on"); else el.classList.remove("on");
+    }
+    if (st.remaining_count === 0) setAuto(false);
+  }
+
+  // ====== Draw con cooldown ======
+  async function draw(){
+    if (!canDrawNow()){
+      const diff = COOLDOWN_MS - (Date.now() - lastDrawAt);
+      const secs = Math.ceil(diff / 1000);
+      pulseDrawButton(`Espera ${secs}s`);
+      // showToast(`⏳ Debes esperar ${secs}s para sacar otra bola`);
+      return;
+    }
+    try{
+      markDraw();           // bloquea clicks repetidos inmediatamente
+      pulseDrawButton();    // feedback rápido
+
+      const resp = await api("/draw",{method:"POST"});
+      const st = resp.state;
+      renderState(st);
+
+      // Sonidos
+      if ($("#preset")?.value === "campanero"){ /* patrón especial ya suena en speakBall */ }
+      else { playDing(); }
+      if (st.last_label) speakBall(st.last_label);
+
+    }catch(e){
+      setAuto(false);
+      console.warn(e); // evita alertas molestas cuando no quedan bolas
+    }
+  }
+
+  async function reset(){
+    try {
+      const r = await api("/reset",{method:"POST"});
+      renderState(r.state);
+      lastDrawAt = 0; // permite sacar una inmediatamente tras el reset
+    } catch(e){ console.error(e); }
+  }
+
+  // ====== Eventos UI ======
+  $("#draw").addEventListener("click", draw);
+  $("#toggleAuto").addEventListener("click", ()=> setAuto(!auto));
+  $("#reset").addEventListener("click", ()=>{
+    setAuto(false);
+    const ok = confirm("🔄 Se va a reiniciar el juego. ¿Deseas continuar?");
+    if (ok) reset();
+  });
+
+  $("#speed").addEventListener("input", e=>{
+    interval = parseInt(e.target.value, 10);
+    const label = auto ? Math.max(interval, COOLDOWN_MS) : interval;
+    $("#speedVal").textContent = label;
+    if (auto){ setAuto(false); setAuto(true); }
+  });
+
+  $("#mute").addEventListener("click", ()=>{
+    IS_MUTED = !IS_MUTED;
+    $("#mute").textContent = IS_MUTED ? "🔇 Sonido: OFF" : "🔈 Sonido: ON";
+    $("#mute").classList.toggle("muted", IS_MUTED);
+    try{ speechSynthesis.cancel(); }catch{}
+  });
+
+  $("#voiceSelect")?.addEventListener("change", (e)=>{
+    const idx = parseInt(e.target.value,10);
+    if (!isNaN(idx) && VOICES[idx]) SELECTED_VOICE = VOICES[idx];
+  });
+
+  $("#pitch")?.addEventListener("input", ()=>{});
+  $("#rate")?.addEventListener("input",  ()=>{});
+  $("#dingToggle")?.addEventListener("change", (e)=>{ useDing = e.target.checked; });
+
+  $("#preset")?.addEventListener("change", ()=>{
+    const p = $("#preset").value;
+    const set = (pt, rt)=>{ $("#pitch").value = String(pt); $("#rate").value = String(rt); };
+    if (p === "helium")   set(1.45, 1.1);
+    if (p === "robot")    set(0.85, 0.9);
+    if (p === "grave")    set(0.7,  0.9);
+    if (p === "payaso")   set(1.2,  1.0);
+    if (p === "darth")    set(0.65, 0.9);
+    if (p === "eco")      set(1.0,  0.95);
+    if (p === "monster")  set(0.6,  0.85);
+    if (p === "sing")     set(1.1,  0.95);
+    if (p === "whisper")  set(1.0,  0.85);
+    if (p === "campanero")set(1.05, 1.0);
+    if (p === "normal")   set(1.0,  0.95);
+    if (p === "random")   set(1.0,  0.95);
+  });
+
+  // 👉 Repetir última bola con voz
+  $("#repeatLast").addEventListener("click", () => {
+    pulseDrawButton(); // pequeño efecto
+    if (!LAST_LABEL){
+      showToast("No hay una bola para repetir aún.");
+      return;
+    }
+    if (IS_MUTED){
+      showToast("Activa el sonido para repetir la última bola.");
+      return;
+    }
+    // Ding opcional (igual que al sacar una nueva)
+    if ($("#preset")?.value === "campanero"){ /* el patrón ya suena en speakBall */ }
+    else { playDing(); }
+    speakBall(LAST_LABEL);
+  });
+
+  $("#testVoice").addEventListener("click", ()=>{
+    if (IS_MUTED) { showToast("Activa el sonido para probar la voz."); return; }
+    // Dentro del rango del bingo 1..75
+    speakBall("O-75");
+  });
+
+  // Atajos
+  document.addEventListener("keydown", (e)=>{
+    if (["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName)) return;
+    if (e.code === "Space"){ e.preventDefault(); draw(); }
+    if (e.key.toLowerCase() === "a"){ setAuto(!auto); }
+    if (e.key.toLowerCase() === "r"){
+      setAuto(false);
+      const ok = confirm("🔄 Se va a reiniciar el juego. ¿Deseas continuar?");
+      if (ok) reset();
+    }
+    if (e.key.toLowerCase() === "m"){ $("#mute").click(); }
+    // Opcional: tecla L para repetir la última
+    if (e.key.toLowerCase() === "l"){ $("#repeatLast").click(); }
+  });
+
+  // Inicio
+  (async ()=>{
+    buildBoard();
+    try { renderState(await api("/state")); } catch(e){ console.error(e); }
+  })();
+  </script>
+</body>
+</html>
