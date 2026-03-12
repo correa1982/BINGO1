@@ -3,521 +3,690 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Llamador Bingo 75 (filas horizontales + muchas voces)</title>
+  <title>🎱 Llamador Bingo 75 – Voces Locas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
   <style>
     :root{
-      --B:#3b82f6; --I:#ef4444; --N:#9ca3af; --G:#22c55e; --O:#eab308;
-      --bg:#f6f7fb; --panel:#ffffff; --muted:#6b7280; --border:#e5e7eb;
-      --cell-bg:#4b5563; --cell-text:#e5e7eb; --row-bg:#3f3f46;
-      --on:#38bdf8; --on-text:#06253a; --shadow:#00000018;
+      --B:#3b82f6; --I:#ef4444; --N:#a855f7; --G:#22c55e; --O:#f97316;
+      --bg:#1a1025; --panel:#231535; --border:#3d2a58; --muted:#9ca3af;
+      --cell-bg:#2d1f42; --cell-text:#c4b5d4; --row-bg:#1e1230;
+      --on:#facc15; --on-text:#1a0a00;
+      --accent:#e879f9;
     }
-    *{box-sizing:border-box}
-    body{margin:0; background:linear-gradient(#f9fafb,#eef2f7);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial; color:#0f172a;}
-    header{padding:12px 16px; background:#fff; border-bottom:1px solid var(--border);
-      display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:5;}
-    h1{margin:0; font-size:18px}
-    .controls{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-    .btn{padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer;
-      font-weight:700; color:#111827; box-shadow:0 2px 6px #00000015; transition:.15s;}
-    .btn:hover{transform:translateY(-1px)}
-    .btn-primary{background:#0ea5e9; color:#f0f9ff; border-color:#0ea5e9}
-    .btn-danger{background:#ef4444; color:#fff; border-color:#ef4444}
-    .btn-ghost{background:#fff}
-    input[type="range"]{accent-color:#0ea5e9}
-    select{padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:#fff}
-    .pill{padding:6px 10px; border-radius:999px; background:#fff; border:1px solid var(--border); font-weight:700; color:#374151}
-    main{max-width:1150px; margin:0 auto; padding:16px}
+    *{box-sizing:border-box; margin:0; padding:0;}
+    body{
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 20% 20%, #3b1f6622 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 80%, #1e3a8a22 0%, transparent 60%);
+      font-family:'Nunito', sans-serif; color:#f0e6ff; min-height:100vh;
+    }
 
-    .top{display:grid; grid-template-columns:1fr 320px; gap:16px; margin-bottom:14px}
-    .last{background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px; display:grid; gap:8px;}
-    .last .label{color:#6b7280; font-size:13px}
-    .last .ball{width:140px; height:140px; border-radius:999px; border:8px solid #e2e8f0; margin:auto; display:grid; place-items:center;
-      font-size:48px; font-weight:900; background:#fff; color:#0f172a; box-shadow:inset 0 -10px 18px #0000000e, 0 12px 30px #00000008;}
-    .last .ball small{display:block; font-size:.42em; color:#475569; margin-top:-6px}
-    .status{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+    /* HEADER */
+    header{
+      padding:10px 16px;
+      background: linear-gradient(135deg, #2d1444, #1e1230);
+      border-bottom:2px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; flex-wrap:wrap; position:sticky; top:0; z-index:10;
+      box-shadow: 0 4px 20px #00000060;
+    }
+    h1{
+      font-family:'Fredoka One', cursive;
+      font-size:22px; letter-spacing:1px;
+      background: linear-gradient(90deg, #e879f9, #facc15, #38bdf8);
+      -webkit-background-clip: text; -webkit-text-fill-color:transparent;
+    }
+    .controls{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
 
-    .board{background:#fff; border:1px solid var(--border); border-radius:12px; overflow:hidden;
-      box-shadow:0 12px 24px #00000010; padding:12px; display:grid; gap:10px;}
-    .row{display:grid; grid-template-columns: 78px repeat(15, 1fr); gap:6px; background:var(--row-bg);
-      padding:8px; border-radius:12px; border:1px solid #2a2a2f;}
-    .head{display:grid; place-items:center}
-    .bball{width:62px; height:62px; border-radius:999px; color:#fff; font-weight:900; display:grid; place-items:center;
-      box-shadow:inset 0 -8px 16px #00000033, 0 6px 16px #00000022; text-shadow:0 1px 1px #0007;
-      border:4px solid #ffffffaa; user-select:none;}
-    .B{background:var(--B)} .I{background:var(--I)} .N{background:var(--N)} .G{background:var(--G)} .O{background:var(--O)}
-    .cell{display:grid; place-items:center; padding:10px; border-radius:10px; background:var(--cell-bg); color:var(--cell-text);
-      font-weight:800; font-variant-numeric:tabular-nums; border:1px solid #2f2f35; user-select:none;}
-    .cell.on{background:var(--on); color:var(--on-text); box-shadow:inset 0 0 0 2px #91defc}
+    /* BUTTONS */
+    .btn{
+      padding:8px 14px; border-radius:12px; border:1px solid var(--border);
+      background:var(--panel); cursor:pointer; font-weight:900; font-family:'Nunito',sans-serif;
+      color:#f0e6ff; box-shadow:0 2px 10px #00000030; transition:.15s;
+      font-size:13px;
+    }
+    .btn:hover{transform:translateY(-2px); box-shadow:0 6px 18px #00000040;}
+    .btn:active{transform:scale(0.96);}
+    .btn-primary{background:linear-gradient(135deg,#7c3aed,#4f46e5); color:#fff; border-color:#7c3aed;}
+    .btn-danger{background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border-color:#dc2626;}
+    .btn-accent{background:linear-gradient(135deg,#c026d3,#7c3aed); color:#fff; border-color:#c026d3;}
+    .pill{
+      padding:5px 10px; border-radius:999px;
+      background:var(--panel); border:1px solid var(--border);
+      font-weight:700; color:#c4b5d4; font-size:12px;
+    }
+    select{
+      padding:6px 10px; border-radius:10px;
+      border:1px solid var(--border); background:var(--panel);
+      color:#f0e6ff; font-family:'Nunito',sans-serif; font-size:12px;
+    }
+    input[type="range"]{accent-color: var(--accent); width:80px;}
 
-    .history{display:flex; flex-wrap:wrap; gap:6px; max-height:130px; overflow:auto; margin-top:12px}
-    .tag{font-size:13px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:#fafafa}
+    /* MAIN */
+    main{max-width:1180px; margin:0 auto; padding:14px 12px;}
 
-    .audio-controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-    .muted{opacity:.6}
-    .sl{display:flex; gap:6px; align-items:center}
+    /* TOP LAYOUT */
+    .top{display:grid; grid-template-columns:1fr 310px; gap:14px; margin-bottom:14px;}
 
-    /* Toast minimalista */
+    /* LAST BALL */
+    .last{
+      background:var(--panel); border:1px solid var(--border); border-radius:16px;
+      padding:14px; display:grid; gap:10px;
+      box-shadow: 0 8px 32px #00000040;
+    }
+    .last .label{color:var(--muted); font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase;}
+    .last .ball{
+      width:130px; height:130px; border-radius:999px; margin:auto;
+      display:grid; place-items:center; font-size:50px; font-weight:900;
+      font-family:'Fredoka One',cursive;
+      background: radial-gradient(circle at 35% 35%, #ffffff22, transparent 60%),
+                  linear-gradient(135deg, #4a2070, #1e1230);
+      border:4px solid #7c3aed55;
+      box-shadow: 0 0 40px #7c3aed40, inset 0 -8px 20px #00000050;
+      color:#fff; text-shadow: 0 2px 10px #7c3aed;
+      transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    }
+    .last .ball.pop{
+      transform: scale(1.18);
+      box-shadow: 0 0 60px #e879f980, inset 0 -8px 20px #00000050;
+    }
+    .last .ball small{display:block; font-size:.38em; color:#e879f9; font-family:'Fredoka One',cursive;}
+    .status{display:flex; gap:8px; flex-wrap:wrap; justify-content:center;}
+
+    /* 🎤 VOICE PANEL */
+    .voice-panel{
+      background:var(--panel); border:1px solid var(--border); border-radius:16px;
+      padding:14px; display:grid; gap:10px;
+      box-shadow: 0 8px 32px #00000040;
+    }
+    .voice-panel h3{
+      font-family:'Fredoka One',cursive; font-size:15px;
+      background:linear-gradient(90deg,#e879f9,#facc15);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+
+    /* CHARACTER GRID */
+    .chars{
+      display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
+    }
+    .char-btn{
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:8px 4px; border-radius:12px; border:2px solid transparent;
+      background:#1e1230; cursor:pointer; transition:.15s; gap:2px;
+      font-family:'Nunito',sans-serif;
+    }
+    .char-btn:hover{border-color:#7c3aed; background:#2d1a45; transform:translateY(-2px);}
+    .char-btn.active{border-color:#e879f9; background:#3d1a55; box-shadow:0 0 14px #e879f940;}
+    .char-btn .emoji{font-size:22px; line-height:1;}
+    .char-btn .name{font-size:9px; font-weight:900; color:#c4b5d4; text-align:center; letter-spacing:.3px;}
+
+    /* BOARD */
+    .board{
+      background:var(--panel); border:1px solid var(--border); border-radius:16px;
+      overflow:hidden; box-shadow:0 12px 32px #00000050;
+      padding:10px; display:grid; gap:8px;
+    }
+    .row{
+      display:grid; grid-template-columns:70px repeat(15,1fr); gap:5px;
+      background:var(--row-bg); padding:7px; border-radius:12px;
+      border:1px solid var(--border);
+    }
+    .head{display:grid; place-items:center;}
+    .bball{
+      width:56px; height:56px; border-radius:999px; font-weight:900;
+      font-family:'Fredoka One',cursive; font-size:20px;
+      display:grid; place-items:center; color:#fff;
+      box-shadow:inset 0 -6px 14px #00000040, 0 4px 12px #00000030;
+      border:3px solid #ffffff30; user-select:none;
+    }
+    .B{background:var(--B)} .I{background:var(--I)} .N{background:var(--N)}
+    .G{background:var(--G)} .O{background:var(--O)}
+    .cell{
+      display:grid; place-items:center; padding:8px 4px; border-radius:8px;
+      background:var(--cell-bg); color:var(--cell-text); font-weight:800;
+      font-variant-numeric:tabular-nums; font-size:13px;
+      border:1px solid #2a1c3d; user-select:none; transition:.2s;
+    }
+    .cell.on{
+      background:var(--on); color:var(--on-text);
+      box-shadow:0 0 12px #facc1560;
+      transform:scale(1.05);
+    }
+
+    /* HISTORY */
+    .history-wrap{margin-top:10px;}
+    .history{display:flex; flex-wrap:wrap; gap:5px; max-height:110px; overflow:auto;}
+    .tag{
+      font-size:12px; font-weight:800; padding:4px 9px; border-radius:7px;
+      background:var(--cell-bg); border:1px solid var(--border); color:var(--cell-text);
+    }
+
+    /* TOAST */
     .toast{
-      position: fixed; left:50%; bottom: 24px; transform: translateX(-50%);
-      background:#111827; color:#f9fafb; padding:10px 14px; border-radius:10px;
-      box-shadow:0 6px 20px #00000030; opacity:0; pointer-events:none; transition:.2s;
-      font-weight:700; font-size:14px; z-index: 9999;
+      position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+      background:#1e1230; color:#f0e6ff; padding:10px 16px; border-radius:12px;
+      border:1px solid var(--border); box-shadow:0 6px 20px #00000050;
+      opacity:0; pointer-events:none; transition:.2s;
+      font-weight:700; font-size:13px; z-index:9999;
     }
-    .toast.show{ opacity:1; pointer-events:auto }
+    .toast.show{opacity:1;}
+
+    /* CONFETTI canvas */
+    #confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;}
+
+    /* sliders row */
+    .sliders{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+    .sl{display:flex; gap:5px; align-items:center; font-size:11px; color:var(--muted); font-weight:700;}
+
+    @media(max-width:700px){
+      .top{grid-template-columns:1fr;}
+      .chars{grid-template-columns:repeat(4,1fr);}
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Llamador Bingo 75</h1>
-    <div class="controls">
-      <button id="draw" class="btn btn-primary">Sacar bola</button>
-      <button id="toggleAuto" class="btn">Automático: OFF</button>
-      <span class="pill">Velocidad: <span id="speedVal">900</span> ms</span>
-      <input id="speed" type="range" min="300" max="10000" step="100" value="900" />
-      <button id="reset" class="btn btn-danger">Reiniciar</button>
 
-      <!-- Controles de audio y voces graciosas -->
-      <div class="audio-controls">
-        <button id="mute" class="btn btn-ghost">🔈 Sonido: ON</button>
-        <label class="pill sl">Voz:
-          <select id="voiceSelect"></select>
-       
+<canvas id="confetti-canvas"></canvas>
 
-        <label class="pill sl">Pitch <input id="pitch" type="range" min="0.5" max="2" step="0.05" value="1"/></label>
-        <label class="pill sl">Rate <input id="rate" type="range" min="0.5" max="1.6" step="0.05" value="0.95"/></label>
-        <label class="pill sl">Ding <input id="dingToggle" type="checkbox" checked /></label>
-        <button id="testVoice" class="btn btn-ghost">🔊 Probar voz</button>
+<header>
+  <h1>🎱 Bingo 75 – Voces Locas</h1>
+  <div class="controls">
+    <button id="draw" class="btn btn-primary">🎲 Sacar bola</button>
+    <button id="toggleAuto" class="btn">⏱ Auto: OFF</button>
+    <span class="pill">⚡ <span id="speedVal">2000</span>ms</span>
+    <input id="speed" type="range" min="1000" max="12000" step="500" value="2000"/>
+    <button id="reset" class="btn btn-danger">🔄 Reiniciar</button>
+    <button id="mute" class="btn">🔈 ON</button>
+    <button id="repeatLast" class="btn btn-accent">🔁 Repetir</button>
+  </div>
+</header>
+
+<main>
+  <div class="top">
+
+    <!-- LEFT: Voice panel -->
+    <div class="voice-panel">
+      <h3>🎤 Elige tu personaje loco</h3>
+      <div class="chars" id="charGrid"></div>
+      <div class="sliders">
+        <label class="sl">🎵 Pitch <input id="pitch" type="range" min="0.4" max="2.2" step="0.05" value="1"/></label>
+        <label class="sl">💨 Rate <input id="rate" type="range" min="0.4" max="1.8" step="0.05" value="0.95"/></label>
+        <label class="sl">🛎 Ding <input id="dingToggle" type="checkbox" checked /></label>
       </div>
-    </div>
-  </header>
-
-  <main>
-    <div class="top">
-      <div></div>
-      <div class="last">
-        <div class="label">Última bola</div>
-        <div class="ball" id="lastBall">—<small></small></div>
-
-        <button id="repeatLast" class="btn btn-ghost" style="margin-top:8px; width:100%;">
-          🔊 Repetir última bola
-        </button>
-
-        <div class="status">
-          <span class="pill">Sacadas: <strong id="count">0</strong></span>
-          <span class="pill">Restantes: <strong id="remaining">75</strong></span>
-        </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <label class="sl" style="font-size:11px; color:#c4b5d4; font-weight:700;">Voz TTS:</label>
+        <select id="voiceSelect" style="max-width:180px;"></select>
       </div>
+      <button id="testVoice" class="btn" style="width:100%;">🔊 Probar personaje</button>
     </div>
 
-    <section class="board">
-      <div id="rowB" class="row"></div>
-      <div id="rowI" class="row"></div>
-      <div id="rowN" class="row"></div>
-      <div id="rowG" class="row"></div>
-      <div id="rowO" class="row"></div>
-    </section>
-  </main>
+    <!-- RIGHT: Last ball + stats -->
+    <div class="last">
+      <div class="label">🎯 Última bola</div>
+      <div class="ball" id="lastBall">—<small></small></div>
+      <div class="status">
+        <span class="pill">✅ Sacadas: <strong id="count">0</strong></span>
+        <span class="pill">🎱 Restantes: <strong id="remaining">75</strong></span>
+      </div>
+    </div>
+  </div>
 
-  <script>
-  const $ =(s)=>document.querySelector(s);
-  let auto=false, timer=null, interval=900;
+  <section class="board">
+    <div id="rowB" class="row"></div>
+    <div id="rowI" class="row"></div>
+    <div id="rowN" class="row"></div>
+    <div id="rowG" class="row"></div>
+    <div id="rowO" class="row"></div>
+  </section>
 
-  // ====== Cooldown (5s) ======
-  const COOLDOWN_MS = 5000; // ⏱️ 5 segundos
-  let lastDrawAt = 0;       // timestamp de la última extracción
+  <div class="history-wrap">
+    <div class="pill" style="display:inline-block;margin-bottom:8px;">📜 Historial</div>
+    <div class="history" id="historyBox"></div>
+  </div>
+</main>
 
-  function canDrawNow(){
-    const now = Date.now();
-    return (now - lastDrawAt) >= COOLDOWN_MS;
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  PERSONAJES DE VOZ
+// ═══════════════════════════════════════════════════════════
+const CHARACTERS = [
+  {
+    id:"normal", emoji:"🎙️", name:"Normal",
+    pitch:1, rate:0.95,
+    transform: (l,n) => `${l} ${n}`,
+  },
+  {
+    id:"helium", emoji:"🎈", name:"Helio",
+    pitch:1.9, rate:1.25,
+    transform: (l,n) => `${l} ${n}! jijiji`,
+    ding:[1100,1400],
+  },
+  {
+    id:"robot", emoji:"🤖", name:"Robot",
+    pitch:0.7, rate:0.75,
+    transform: (l,n) => `${l}. ${n}. ${n}. procesando.`,
+    ding:[300,400],
+  },
+  {
+    id:"abuelo", emoji:"👴", name:"Abuelo",
+    pitch:0.65, rate:0.65,
+    transform: (l,n) => `Eeeh... la ${l}, el número ${n}. ¡Que Dios nos guarde!`,
+    ding:[440],
+  },
+  {
+    id:"bebe", emoji:"👶", name:"Bebé",
+    pitch:2.1, rate:1.1,
+    transform: (l,n) => `${l} ${n} tatata guagua`,
+    ding:[1200,1500],
+  },
+  {
+    id:"pirata", emoji:"🏴‍☠️", name:"Pirata",
+    pitch:0.9, rate:0.9,
+    transform: (l,n) => `¡Arrrr! ${l}, el ${n}, en el fondo del mar!`,
+    ding:[440,550],
+  },
+  {
+    id:"fantasma", emoji:"👻", name:"Fantasma",
+    pitch:1.1, rate:0.7,
+    transform: (l,n) => `uuuuuh... ${l}... ${n}... uuuuh`,
+    volume:0.5,
+    ding:[200,180],
+  },
+  {
+    id:"operatico", emoji:"🎭", name:"Ópera",
+    pitch:1.6, rate:0.75,
+    transform: (l,n) => `¡OH, la ${l}! ¡el glorioso ${n}!`,
+    ding:[660,880,1100],
+  },
+  {
+    id:"rapper", emoji:"🎤", name:"Rapper",
+    pitch:0.85, rate:1.5,
+    transform: (l,n) => `yo! ${l} ${n} en la casa, bingo bingo!`,
+    ding:[100,200],
+  },
+  {
+    id:"cuchicheo", emoji:"🤫", name:"Cuchicheo",
+    pitch:1.0, rate:0.75,
+    volume:0.3,
+    transform: (l,n) => `psss... ${l}... ${n}... no le digas a nadie`,
+    ding:[],
+  },
+  {
+    id:"terror", emoji:"💀", name:"Terror",
+    pitch:0.45, rate:0.65,
+    transform: (l,n) => `${l}... ${n}... nadie escapará...`,
+    ding:[80,60],
+  },
+  {
+    id:"borracho", emoji:"🍺", name:"Borracho",
+    pitch:0.95, rate:0.7,
+    transform: (l,n) => `ehhhh... la ${l}... el... el ${n}... creo`,
+    ding:[330,280,350],
+  },
+  {
+    id:"anime", emoji:"✨", name:"Anime",
+    pitch:1.8, rate:1.2,
+    transform: (l,n) => `${l} ${n}! Gambatte kudasai! sugoi!`,
+    ding:[900,1100,900],
+  },
+  {
+    id:"campeon", emoji:"🏆", name:"Campeón",
+    pitch:1.15, rate:1.0,
+    transform: (l,n) => `¡¡ LA ${l.toUpperCase()} !! ¡¡ EL ${n} !! ¡¡ INCREÍBLE!!`,
+    ding:[523,659,784,1047],
+  },
+  {
+    id:"alien", emoji:"👽", name:"Alien",
+    pitch:1.3, rate:1.1,
+    transform: (l,n) => `BZZZT ${l} ${n} BZZZT transmisión recibida BZZZT`,
+    ding:[600,400,800],
+  },
+  {
+    id:"random", emoji:"🎲", name:"Aleatorio",
+    pitch:1, rate:0.95,
+    transform: (l,n) => `${l} ${n}`,
+    isRandom:true,
+  },
+];
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let IS_MUTED   = false;
+let useDing    = true;
+let VOICES     = [];
+let SEL_VOICE  = null;
+let LAST_LABEL = null;
+let AUTO       = false;
+let TIMER      = null;
+let INTERVAL   = 2000;
+let ACTIVE_CHAR= CHARACTERS[0];
+let lastDrawAt = 0;
+const COOLDOWN = 3500;
+
+// Local state (no backend)
+let allNums  = Array.from({length:75},(_,i)=>i+1);
+let pool     = [...allNums];
+let history  = [];
+let lastNum  = null;
+
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+const $ = s => document.querySelector(s);
+
+function showToast(msg, ms=1800){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>t.classList.remove("show"), ms);
+}
+
+function letterByNum(n){
+  if (n <= 15) return "B";
+  if (n <= 30) return "I";
+  if (n <= 45) return "N";
+  if (n <= 60) return "G";
+  return "O";
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BOARD
+// ═══════════════════════════════════════════════════════════
+function buildRow(id, letter, start){
+  const row = $(id); row.innerHTML = "";
+  const head = document.createElement("div");
+  head.className="head";
+  head.innerHTML=`<div class="bball ${letter}">${letter}</div>`;
+  row.appendChild(head);
+  for(let k=0;k<15;k++){
+    const n=start+k;
+    const c=document.createElement("div");
+    c.className="cell"; c.id=`n-${n}`; c.textContent=n;
+    row.appendChild(c);
   }
-  function markDraw(){ lastDrawAt = Date.now(); }
+}
+function buildBoard(){
+  buildRow("#rowB","B",1);
+  buildRow("#rowI","I",16);
+  buildRow("#rowN","N",31);
+  buildRow("#rowG","G",46);
+  buildRow("#rowO","O",61);
+}
 
-  // Toast simple
-  function showToast(msg, ms=1800){
-    let t = $("#toast");
-    if (!t){
-      t = document.createElement("div");
-      t.id = "toast";
-      t.className = "toast";
-      document.body.appendChild(t);
-    }
-    t.textContent = msg;
-    t.classList.add("show");
-    clearTimeout(showToast._timer);
-    showToast._timer = setTimeout(()=> t.classList.remove("show"), ms);
+function renderBoard(){
+  const set=new Set(history);
+  for(let n=1;n<=75;n++){
+    const el=document.getElementById(`n-${n}`);
+    if(!el) continue;
+    el.classList.toggle("on", set.has(n));
   }
+  $("#count").textContent = history.length;
+  $("#remaining").textContent = pool.length;
 
-  // Feedback rápido en el botón
-  function pulseDrawButton(msg=null){
-    const btn = $("#draw");
-    if (!btn) return;
-    const old = btn.textContent;
-    if (msg){
-      btn.textContent = msg;
-      btn.disabled = true;
-      btn.style.opacity = 0.75;
-      setTimeout(()=>{ btn.textContent = old; btn.disabled = false; btn.style.opacity = 1; }, 1200);
-    } else {
-      btn.style.transform = 'scale(0.97)';
-      setTimeout(()=> btn.style.transform = '', 120);
-    }
+  // history tags
+  const hb = $("#historyBox"); hb.innerHTML="";
+  [...history].reverse().forEach(n=>{
+    const t=document.createElement("div");
+    t.className="tag";
+    t.textContent=`${letterByNum(n)}-${n}`;
+    hb.appendChild(t);
+  });
+}
+
+function renderLastBall(label){
+  const lb = $("#lastBall");
+  if(label){
+    const [L,num]=label.split("-");
+    lb.innerHTML=`${num}<small>${L}</small>`;
+    lb.classList.remove("pop");
+    requestAnimationFrame(()=>{ lb.classList.add("pop"); setTimeout(()=>lb.classList.remove("pop"),400); });
+  } else {
+    lb.innerHTML="—<small></small>";
   }
+}
 
-  // --- Voz del sistema (mensajes no de bola) ---
-  function speakSystem(text){
-    if (IS_MUTED || !("speechSynthesis" in window)) return;
-    const u = new SpeechSynthesisUtterance(text);
-    u.voice = SELECTED_VOICE || null;
-    u.lang = (SELECTED_VOICE && SELECTED_VOICE.lang) || "es-ES";
-    u.pitch = 1;
-    u.rate = 0.95;
-    u.volume = 1.0;
-    try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch {}
+// ═══════════════════════════════════════════════════════════
+//  AUDIO
+// ═══════════════════════════════════════════════════════════
+function populateVoices(){
+  if(!("speechSynthesis" in window)) return;
+  VOICES = speechSynthesis.getVoices();
+  const sel = $("#voiceSelect"); if(!sel) return;
+  sel.innerHTML="";
+  const pref = v => /(es-|es_)/i.test(v.lang)?0:1;
+  [...VOICES].sort((a,b)=>pref(a)-pref(b)||a.name.localeCompare(b.name)).forEach((v,i)=>{
+    const o=document.createElement("option");
+    o.value=String(VOICES.indexOf(v));
+    o.textContent=`${v.name} (${v.lang})`;
+    sel.appendChild(o);
+  });
+  if(VOICES.length){
+    const idx=VOICES.findIndex(v=>/(es-|es_)/i.test(v.lang));
+    sel.value = idx>=0?String(idx):"0";
+    SEL_VOICE = VOICES[parseInt(sel.value,10)];
   }
+}
+if("speechSynthesis" in window){
+  populateVoices();
+  window.speechSynthesis.onvoiceschanged=populateVoices;
+}
 
-  // ====== Audio & Voces ======
-  let IS_MUTED = false;
-  let VOICES = [];
-  let SELECTED_VOICE = null;
-  let useDing = true;
-
-  // 👉 Guarda la última etiqueta (B-12, N-42, etc.)
-  let LAST_LABEL = null;
-
-  function populateVoices(){
-    if (!("speechSynthesis" in window)) return;
-    VOICES = speechSynthesis.getVoices();
-    const sel = $("#voiceSelect"); if (!sel) return;
-    sel.innerHTML = "";
-    const prefer = v => /(es-|es_)/i.test(v.lang) ? 0 : 1;
-    VOICES.sort((a,b)=> prefer(a)-prefer(b) || a.name.localeCompare(b.name));
-    VOICES.forEach((v, idx)=>{
-      const opt = document.createElement("option");
-      opt.value = String(idx);
-      opt.textContent = `${v.name} (${v.lang})`;
-      sel.appendChild(opt);
+function playTones(freqs=[]){
+  if(IS_MUTED || !useDing || !freqs.length) return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    let t=ctx.currentTime;
+    freqs.forEach(freq=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.type="sine"; o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.28,t+0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t); o.stop(t+0.25);
+      t+=0.18;
     });
-    if (VOICES.length){
-      const idxES = VOICES.findIndex(v=>/(es-|es_)/i.test(v.lang));
-      sel.value = idxES >= 0 ? String(idxES) : "0";
-      SELECTED_VOICE = VOICES[parseInt(sel.value,10)];
-    }
-  }
-  if ("speechSynthesis" in window){
-    populateVoices();
-    window.speechSynthesis.onvoiceschanged = populateVoices;
-  }
+  }catch{}
+}
 
-  function playDingPattern(pattern=[880,1100]){
-    if (IS_MUTED || !useDing) return;
-    try{
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      let t = ctx.currentTime;
-      pattern.forEach((freq)=>{
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = "sine"; o.frequency.value = freq;
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(0.25, t+0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, t+0.18);
-        o.connect(g); g.connect(ctx.destination);
-        o.start(t); o.stop(t+0.2);
-        t += 0.15;
-      });
-    }catch{}
-  }
-  function playDing(){ playDingPattern([880]); }
+function speakOnce(text, opts={}){
+  if(IS_MUTED||!("speechSynthesis" in window)) return;
+  const u=new SpeechSynthesisUtterance(text);
+  u.voice=SEL_VOICE||null;
+  u.lang=(SEL_VOICE&&SEL_VOICE.lang)||"es-ES";
+  u.pitch=opts.pitch??1;
+  u.rate=opts.rate??0.95;
+  u.volume=opts.volume??1;
+  try{ speechSynthesis.speak(u); }catch{}
+}
 
-  function numberToSpanish(n){ return String(parseInt(n,10)); }
-  function stutter(word){ if (!word) return word; if (word.length<=2) return word; return `${word[0]}-${word[0]}-${word}`; }
-  function chooseRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function speakBall(label){
+  if(IS_MUTED||!("speechSynthesis" in window)||!label) return;
+  const [L,num]=label.split("-");
 
-  function funnyTransform(label, preset){
-    const [letter, raw] = label.split("-");
-    const num = numberToSpanish(raw);
-    if (preset === "random"){
-      preset = chooseRandom(["helium","robot","grave","payaso","darth","eco","monster","sing","whisper","campanero"]);
-    }
-    switch (preset){
-      case "helium":   return `${letter} ${num}! jijiji`;
-      case "robot":    return `${letter}. ${stutter(num)}.`;
-      case "grave":    return `${letter} ${num}`;
-      case "payaso":   return `${letter} ${num} ¡toma chango tu banana!`;
-      case "darth":    return `${letter} ${num}...`;
-      case "eco":      return `${letter} ${num}... ${num}... ${num}...`;
-      case "monster":  return `${letter} ${num} en la caverna...`;
-      case "sing":     return `${letter} ${num} ♫`;
-      case "whisper":  return `shhh... ${letter} ${num}`;
-      case "campanero":return `${letter} ${num}`;
-      default:         return `${letter} ${num}`;
-    }
+  let char = ACTIVE_CHAR;
+  if(char.isRandom){
+    const pool = CHARACTERS.filter(c=>!c.isRandom);
+    char = pool[Math.floor(Math.random()*pool.length)];
   }
 
-  function speakOnce(text, opts={}){
-    if (IS_MUTED || !("speechSynthesis" in window)) return;
-    const u = new SpeechSynthesisUtterance(text);
-    u.voice = SELECTED_VOICE || null;
-    u.lang  = (SELECTED_VOICE && SELECTED_VOICE.lang) || "es-ES";
-    u.pitch = opts.pitch ?? parseFloat($("#pitch")?.value ?? 1);
-    u.rate  = opts.rate  ?? parseFloat($("#rate")?.value ?? 0.95);
-    u.volume= opts.volume?? 1.0;
-    try{ speechSynthesis.speak(u); }catch{}
-    return u;
+  const text = char.transform(L, num);
+  const p = char.pitch ?? parseFloat($("#pitch")?.value??1);
+  const r = char.rate  ?? parseFloat($("#rate")?.value??0.95);
+  const v = char.volume ?? 1;
+  const freqs = char.ding !== undefined ? char.ding : [880];
+
+  playTones(freqs);
+
+  if(char.id==="eco"){
+    speakOnce(text,{pitch:p,rate:r,volume:v});
+    setTimeout(()=>speakOnce(text,{pitch:p+0.06,rate:r+0.05,volume:0.65}),260);
+    setTimeout(()=>speakOnce(text,{pitch:p+0.1,rate:r+0.08,volume:0.4}),520);
+  } else if(char.id==="campeon"){
+    speakOnce(text,{pitch:p,rate:r,volume:v});
+    setTimeout(()=>speakOnce("¡BINGO AMIGOS!",{pitch:p+0.2,rate:r,volume:0.8}),700);
+  } else if(char.id==="borracho"){
+    speakOnce(text,{pitch:p,rate:r,volume:v});
+    setTimeout(()=>speakOnce("ehhh",{pitch:Math.max(0.4,p-0.1),rate:0.5,volume:0.5}),600);
+  } else {
+    speakOnce(text,{pitch:p,rate:r,volume:v});
   }
+}
 
-  function speakBall(label){
-    if (IS_MUTED || !("speechSynthesis" in window) || !label) return;
-    const basePitch = parseFloat($("#pitch")?.value ?? 1);
-    const baseRate  = parseFloat($("#rate")?.value ?? 0.95);
-    const presetSel = $("#preset")?.value ?? "normal";
-    const preset = presetSel === "random"
-      ? chooseRandom(["helium","robot","grave","payaso","darth","eco","monster","sing","whisper","campanero","normal"])
-      : presetSel;
-
-    if (preset === "campanero") playDingPattern([784,988]); // campanazo
-
-    const text = funnyTransform(label, preset);
-    let p = basePitch, r = baseRate, v = 1.0;
-
-    switch (preset){
-      case "helium":   p = Math.min(2, p+0.7); r = Math.min(1.6, r+0.15); break;
-      case "robot":    p = Math.max(0.6, p-0.25); r = Math.max(0.6, r-0.05); break;
-      case "grave":    p = Math.max(0.5, p-0.4); r = Math.max(0.7, r-0.05); break;
-      case "payaso":   p = Math.min(2, p+0.3); r = Math.min(1.6, r+0.05); break;
-      case "darth":    p = Math.max(0.5, p-0.45); r = Math.max(0.75, r-0.05); break;
-      case "whisper":  r = Math.max(0.8, r-0.05); v = 0.4; break;
-      case "monster":  p = Math.max(0.5, p-0.5); r = Math.max(0.7, r-0.1); break;
-    }
-
-    if (preset === "eco"){
-      speakOnce(text, {pitch:p, rate:r, volume:1});
-      setTimeout(()=>speakOnce(text, {pitch:p+0.05, rate:r+0.05, volume:0.7}), 240);
-      setTimeout(()=>speakOnce(text, {pitch:p+0.08, rate:r+0.08, volume:0.5}), 480);
-    } else if (preset === "sing"){
-      speakOnce(text.replace("♫",""), {pitch:p+0.35, rate:r, volume:v});
-      setTimeout(()=>speakOnce(text.replace("♫",""), {pitch:Math.max(0.6,p-0.2), rate:r-0.02, volume:v}), 300);
-    } else if (preset === "monster"){
-      speakOnce(text, {pitch:p, rate:r, volume:v});
-      setTimeout(()=>speakOnce(text, {pitch:Math.max(0.5,p-0.1), rate:r+0.02, volume:0.6}), 220);
-    } else {
-      speakOnce(text, {pitch:p, rate:r, volume:v});
-    }
-  }
-
-  // ====== Backend API & Render ======
-  function setAuto(on){
-    auto = on;
-    $("#toggleAuto").textContent = `Automático: ${auto ? "ON" : "OFF"}`;
-    const effective = Math.max(interval, COOLDOWN_MS); // mínimo 5s en auto
-    if (auto){
-      if (timer) clearInterval(timer);
-      timer = setInterval(draw, effective);
-      $("#speedVal").textContent = effective; // muestra intervalo efectivo
-    } else {
-      if (timer) clearInterval(timer);
-      timer = null;
-      $("#speedVal").textContent = interval;
-    }
-  }
-
-  async function api(path, opts={}){
-    const res = await fetch(path, {
-      method: opts.method || "GET",
-      headers: {"Content-Type":"application/json"},
-      body: opts.body ? JSON.stringify(opts.body) : undefined
+// ═══════════════════════════════════════════════════════════
+//  CONFETTI (pequeño burst)
+// ═══════════════════════════════════════════════════════════
+function burstConfetti(){
+  const canvas=$("#confetti-canvas");
+  const ctx=canvas.getContext("2d");
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const particles=[];
+  const colors=["#e879f9","#facc15","#38bdf8","#22c55e","#ef4444","#f97316"];
+  for(let i=0;i<50;i++){
+    particles.push({
+      x:Math.random()*canvas.width, y:Math.random()*canvas.height*0.4,
+      r:Math.random()*6+3, dx:(Math.random()-0.5)*4,
+      dy:Math.random()*3+2, alpha:1,
+      color:colors[Math.floor(Math.random()*colors.length)]
     });
-    if (!res.ok){
-      let msg = "Error";
-      try { const j = await res.json(); msg = j.error || msg; } catch {}
-      throw new Error(msg);
-    }
-    return res.json();
   }
-
-  function buildRow(containerId, letter, start){
-    const row = $(containerId); row.innerHTML = "";
-    const head = document.createElement("div");
-    head.className = "head";
-    head.innerHTML = `<div class="bball ${letter}">${letter}</div>`;
-    row.appendChild(head);
-    for (let k=0; k<15; k++){
-      const n = start + k;
-      const c = document.createElement("div");
-      c.className = "cell";
-      c.id = `n-${n}`;
-      c.textContent = n;
-      row.appendChild(c);
-    }
+  let frame=0;
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.x+=p.dx; p.y+=p.dy; p.alpha-=0.02;
+      ctx.globalAlpha=Math.max(0,p.alpha);
+      ctx.fillStyle=p.color;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    });
+    if(frame++<80 && particles.some(p=>p.alpha>0)) requestAnimationFrame(animate);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
   }
-  function buildBoard(){
-    buildRow("#rowB","B",1);
-    buildRow("#rowI","I",16);
-    buildRow("#rowN","N",31);
-    buildRow("#rowG","G",46);
-    buildRow("#rowO","O",61);
+  animate();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DRAW LOGIC (standalone, no backend)
+// ═══════════════════════════════════════════════════════════
+function canDraw(){ return (Date.now()-lastDrawAt)>=COOLDOWN; }
+
+function draw(){
+  if(!canDraw()){
+    const secs=Math.ceil((COOLDOWN-(Date.now()-lastDrawAt))/1000);
+    showToast(`⏳ Espera ${secs}s`);
+    return;
   }
-  function letterByNum(n){
-    if (1 <= n && n <= 15) return "B";
-    if (16 <= n && n <= 30) return "I";
-    if (31 <= n && n <= 45) return "N";
-    if (46 <= n && n <= 60) return "G";
-    return "O";
-  }
-  function renderState(st){
-    const lb = $("#lastBall");
-    if (st.last_label){
-      const [L, num] = st.last_label.split("-");
-      lb.innerHTML = `${num}<small>${L}</small>`;
-      LAST_LABEL = st.last_label; // guarda para repetir
-    } else if (st.last){
-      lb.textContent = String(st.last);
-      LAST_LABEL = st.last ? `${letterByNum(st.last)}-${st.last}` : null;
-    } else {
-      lb.innerHTML = "—<small></small>";
-      LAST_LABEL = null;
-    }
+  if(pool.length===0){ showToast("🎉 ¡Se acabaron las bolas!"); setAuto(false); return; }
 
-    $("#count").textContent = st.history.length;
-    $("#remaining").textContent = st.remaining_count;
+  lastDrawAt=Date.now();
+  const idx=Math.floor(Math.random()*pool.length);
+  const num=pool.splice(idx,1)[0];
+  history.push(num);
+  lastNum=num;
+  LAST_LABEL=`${letterByNum(num)}-${num}`;
 
-    const set = new Set(st.history);
-    for (let n=1; n<=75; n++){
-      const el = document.getElementById(`n-${n}`);
-      if (!el) continue;
-      if (set.has(n)) el.classList.add("on"); else el.classList.remove("on");
-    }
-    if (st.remaining_count === 0) setAuto(false);
-  }
-
-  // ====== Draw con cooldown ======
-  async function draw(){
-    if (!canDrawNow()){
-      const diff = COOLDOWN_MS - (Date.now() - lastDrawAt);
-      const secs = Math.ceil(diff / 1000);
-      pulseDrawButton(`Espera ${secs}s`);
-      // showToast(`⏳ Debes esperar ${secs}s para sacar otra bola`);
-      return;
-    }
-    try{
-      markDraw();           // bloquea clicks repetidos inmediatamente
-      pulseDrawButton();    // feedback rápido
-
-      const resp = await api("/draw",{method:"POST"});
-      const st = resp.state;
-      renderState(st);
-
-      // Sonidos
-      if ($("#preset")?.value === "campanero"){ /* patrón especial ya suena en speakBall */ }
-      else { playDing(); }
-      if (st.last_label) speakBall(st.last_label);
-
-    }catch(e){
-      setAuto(false);
-      console.warn(e); // evita alertas molestas cuando no quedan bolas
-    }
-  }
-
-  async function reset(){
-    try {
-      const r = await api("/reset",{method:"POST"});
-      renderState(r.state);
-      lastDrawAt = 0; // permite sacar una inmediatamente tras el reset
-    } catch(e){ console.error(e); }
-  }
-
-  // ====== Eventos UI ======
-  $("#draw").addEventListener("click", draw);
-  $("#toggleAuto").addEventListener("click", ()=> setAuto(!auto));
-  $("#reset").addEventListener("click", ()=>{
+  renderBoard();
+  renderLastBall(LAST_LABEL);
+  speakBall(LAST_LABEL);
+  if(pool.length===0){
+    burstConfetti();
+    showToast("🎊 ¡Último número! ¡Alguien tiene que haber ganado!", 4000);
     setAuto(false);
-    const ok = confirm("🔄 Se va a reiniciar el juego. ¿Deseas continuar?");
-    if (ok) reset();
+  }
+}
+
+function resetGame(){
+  pool=[...allNums]; history=[]; lastNum=null; LAST_LABEL=null; lastDrawAt=0;
+  renderBoard(); renderLastBall(null);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AUTO
+// ═══════════════════════════════════════════════════════════
+function setAuto(on){
+  AUTO=on;
+  $("#toggleAuto").textContent=`⏱ Auto: ${on?"ON":"OFF"}`;
+  if(TIMER){ clearInterval(TIMER); TIMER=null; }
+  if(on){ TIMER=setInterval(draw, Math.max(INTERVAL,COOLDOWN)); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CHARACTER GRID
+// ═══════════════════════════════════════════════════════════
+function buildCharGrid(){
+  const grid=$("#charGrid"); grid.innerHTML="";
+  CHARACTERS.forEach(ch=>{
+    const btn=document.createElement("button");
+    btn.className="char-btn" + (ch.id===ACTIVE_CHAR.id?" active":"");
+    btn.dataset.id=ch.id;
+    btn.innerHTML=`<span class="emoji">${ch.emoji}</span><span class="name">${ch.name}</span>`;
+    btn.addEventListener("click",()=>{
+      ACTIVE_CHAR=ch;
+      document.querySelectorAll(".char-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      // Update sliders
+      if(!ch.isRandom){
+        if(ch.pitch!==undefined) $("#pitch").value=String(ch.pitch);
+        if(ch.rate!==undefined)  $("#rate").value =String(ch.rate);
+      }
+    });
+    grid.appendChild(btn);
   });
+}
 
-  $("#speed").addEventListener("input", e=>{
-    interval = parseInt(e.target.value, 10);
-    const label = auto ? Math.max(interval, COOLDOWN_MS) : interval;
-    $("#speedVal").textContent = label;
-    if (auto){ setAuto(false); setAuto(true); }
-  });
+// ═══════════════════════════════════════════════════════════
+//  EVENTS
+// ═══════════════════════════════════════════════════════════
+$("#draw").addEventListener("click", draw);
+$("#toggleAuto").addEventListener("click",()=>setAuto(!AUTO));
+$("#reset").addEventListener("click",()=>{
+  setAuto(false);
+  if(confirm("🔄 ¿Reiniciar el juego?")) resetGame();
+});
+$("#speed").addEventListener("input",e=>{
+  INTERVAL=parseInt(e.target.value,10);
+  $("#speedVal").textContent=INTERVAL;
+  if(AUTO){ setAuto(false); setAuto(true); }
+});
+$("#mute").addEventListener("click",()=>{
+  IS_MUTED=!IS_MUTED;
+  $("#mute").textContent=IS_MUTED?"🔇 OFF":"🔈 ON";
+  try{ speechSynthesis.cancel(); }catch{}
+});
+$("#voiceSelect")?.addEventListener("change",e=>{
+  const idx=parseInt(e.target.value,10);
+  if(!isNaN(idx)&&VOICES[idx]) SEL_VOICE=VOICES[idx];
+});
+$("#dingToggle")?.addEventListener("change",e=>{ useDing=e.target.checked; });
+$("#repeatLast").addEventListener("click",()=>{
+  if(!LAST_LABEL){ showToast("Aún no hay ninguna bola."); return; }
+  if(IS_MUTED){ showToast("Activa el sonido primero."); return; }
+  speakBall(LAST_LABEL);
+});
+$("#testVoice").addEventListener("click",()=>{
+  if(IS_MUTED){ showToast("Activa el sonido primero."); return; }
+  speakBall("O-75");
+});
 
-  $("#mute").addEventListener("click", ()=>{
-    IS_MUTED = !IS_MUTED;
-    $("#mute").textContent = IS_MUTED ? "🔇 Sonido: OFF" : "🔈 Sonido: ON";
-    $("#mute").classList.toggle("muted", IS_MUTED);
-    try{ speechSynthesis.cancel(); }catch{}
-  });
+document.addEventListener("keydown",e=>{
+  if(["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName)) return;
+  if(e.code==="Space"){ e.preventDefault(); draw(); }
+  if(e.key.toLowerCase()==="a") setAuto(!AUTO);
+  if(e.key.toLowerCase()==="r"){ setAuto(false); if(confirm("🔄 ¿Reiniciar?")) resetGame(); }
+  if(e.key.toLowerCase()==="m") $("#mute").click();
+  if(e.key.toLowerCase()==="l") $("#repeatLast").click();
+});
 
-  $("#voiceSelect")?.addEventListener("change", (e)=>{
-    const idx = parseInt(e.target.value,10);
-    if (!isNaN(idx) && VOICES[idx]) SELECTED_VOICE = VOICES[idx];
-  });
-
-  $("#pitch")?.addEventListener("input", ()=>{});
-  $("#rate")?.addEventListener("input",  ()=>{});
-  $("#dingToggle")?.addEventListener("change", (e)=>{ useDing = e.target.checked; });
-
-  $("#preset")?.addEventListener("change", ()=>{
-    const p = $("#preset").value;
-    const set = (pt, rt)=>{ $("#pitch").value = String(pt); $("#rate").value = String(rt); };
-    if (p === "helium")   set(1.45, 1.1);
-    if (p === "robot")    set(0.85, 0.9);
-    if (p === "grave")    set(0.7,  0.9);
-    if (p === "payaso")   set(1.2,  1.0);
-    if (p === "darth")    set(0.65, 0.9);
-    if (p === "eco")      set(1.0,  0.95);
-    if (p === "monster")  set(0.6,  0.85);
-    if (p === "sing")     set(1.1,  0.95);
-    if (p === "whisper")  set(1.0,  0.85);
-    if (p === "campanero")set(1.05, 1.0);
-    if (p === "normal")   set(1.0,  0.95);
-    if (p === "random")   set(1.0,  0.95);
-  });
-
-  // 👉 Repetir última bola con voz
-  $("#repeatLast").addEventListener("click", () => {
-    pulseDrawButton(); // pequeño efecto
-    if (!LAST_LABEL){
-      showToast("No hay una bola para repetir aún.");
-      return;
-    }
-    if (IS_MUTED){
-      showToast("Activa el sonido para repetir la última bola.");
-      return;
-    }
-    // Ding opcional (igual que al sacar una nueva)
-    if ($("#preset")?.value === "campanero"){ /* el patrón ya suena en speakBall */ }
-    else { playDing(); }
-    speakBall(LAST_LABEL);
-  });
-
-  $("#testVoice").addEventListener("click", ()=>{
-    if (IS_MUTED) { showToast("Activa el sonido para probar la voz."); return; }
-    // Dentro del rango del bingo 1..75
-    speakBall("O-75");
-  });
-
-  // Atajos
-  document.addEventListener("keydown", (e)=>{
-    if (["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName)) return;
-    if (e.code === "Space"){ e.preventDefault(); draw(); }
-    if (e.key.toLowerCase() === "a"){ setAuto(!auto); }
-    if (e.key.toLowerCase() === "r"){
-      setAuto(false);
-      const ok = confirm("🔄 Se va a reiniciar el juego. ¿Deseas continuar?");
-      if (ok) reset();
-    }
-    if (e.key.toLowerCase() === "m"){ $("#mute").click(); }
-    // Opcional: tecla L para repetir la última
-    if (e.key.toLowerCase() === "l"){ $("#repeatLast").click(); }
-  });
-
-  // Inicio
-  (async ()=>{
-    buildBoard();
-    try { renderState(await api("/state")); } catch(e){ console.error(e); }
-  })();
-  </script>
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+buildBoard();
+buildCharGrid();
+renderBoard();
+</script>
 </body>
 </html>
